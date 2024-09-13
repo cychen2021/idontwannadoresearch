@@ -5,7 +5,9 @@ import os
 import sys
 
 class Mailogger:
-    def __init__(self, identifier: str, smtp_server: str, sender_email: str, smtp_port: int) -> None:
+    def __init__(self, identifier: str, 
+                 smtp_server: str, sender_email: str, smtp_port: int,
+                 receiver_email: str) -> None:
         if 'MAILOG_PASSWORD' not in os.environ:
             print("Please set the MAILOG_PASSWORD environment variable")
             sys.exit(1)
@@ -14,10 +16,11 @@ class Mailogger:
         self.smtp_server = smtp_server
         self.smtp_port = smtp_port
         self.identifier = identifier
-    def log(self, receiver_email: str, subject: str, body: str) -> None:
+        self.receiver_email = receiver_email
+    def log(self, subject: str, body: str = '') -> None:
         msg = EmailMessage()
         msg['From'] = self.sender_email
-        msg['To'] = receiver_email
+        msg['To'] = self.receiver_email
         msg['Subject'] = f'[mailog:{self.identifier}] subject'
         timestamp = datetime.now().strftime(r'%Y-%m-%d %H:%M:%S')
         msg.set_content(body + f'\n---timestamp: {timestamp}---\n')

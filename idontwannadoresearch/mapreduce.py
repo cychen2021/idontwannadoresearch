@@ -88,8 +88,9 @@ class Mapping[T, R]:
         accumulate.mapping = self
         return accumulate()
 
-def mapping[T, R](mapper: Callable[[Sequence[T]], R], para_num: int = 1) -> Mapping[T, R]:
-    return Mapping(mapper, para_num=para_num)
+def mapping[T, R](mapper: Callable[[Sequence[T]], R], para_num: int = 1, 
+                  callback: Callable[[Sequence[T], concurrent.futures.Future[R]]] | None = None) -> Mapping[T, R]:
+    return Mapping(mapper, para_num=para_num, callback=callback)
 
 
 class Accumulate[T, R]:

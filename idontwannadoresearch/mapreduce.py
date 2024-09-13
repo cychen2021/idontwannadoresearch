@@ -48,10 +48,13 @@ def segment(seg_num: int) -> Segment:
 
 
 class Mapping[T, R]:
-    def __init__(self, mapper: Callable[[Sequence[T]], R], para_num: int | None = None, segment: Segment[T] | None = None) -> None:
+    def __init__(self, mapper: Callable[[Sequence[T]], R], para_num: int | None = None,
+                 callback: Callable[[Sequence[T], concurrent.futures.Future[R]], Any] | None = None, 
+                 segment: Segment[T] | None = None) -> None:
         self.mapper = mapper
         self.segment = segment
         self.par_num = para_num
+        self.callback = callback
 
     def map(self, data: Sequence[T]) -> R:
         return self.mapper(data)
@@ -61,18 +64,23 @@ class Mapping[T, R]:
         function = dill.loads(pickled_function)
         return function(data)
     
-    def __call__(self) -> list[R]:
+    def __call__(self,) -> list[R]:
         assert self.segment is not None, "Segment is not set"
         segments = self.segment()
         
         futures = []
+        arguments = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=len(segments) if self.par_num is None else self.par_num) as executor:
             for segment in segments:
                 futures.append(executor.submit(self.wrapper, dill.dumps(self.map), segment))
+                arguments.append(segment)
         assert len(futures) == len(segments), "Length of futures and segments are not equal"
-        result = []
+        result: list[R] = []
         for future in concurrent.futures.as_completed(futures):
-            result.append(future.result())
+            r = future.result()
+            if self.callback is not None:
+                self.callback(segment, future)
+            result.append(r)
 
         return result
 

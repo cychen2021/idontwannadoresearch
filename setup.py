@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='idontwannadoresearch',  # Name of the package
-    version='0.0.15',  # Initial version
+    version='0.0.16',  # Initial version
     description='Research utilities',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
@@ -11,7 +11,8 @@ setup(
     author_email='chuyangchen2018@outlook.com',
     license='MIT',  # License you choose
     packages=find_packages(),  # Finds submodules automatically
-    install_requires=[],  # List of dependencies
+    install_requires=[
+        'dill~=0.3.8'],  # List of dependencies
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',

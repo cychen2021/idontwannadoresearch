@@ -1,5 +1,6 @@
 from typing import Any, Sequence, Callable
 import concurrent.futures
+import dill
 
 class Project[T]:
     def __init__(self, data: Sequence[T]) -> None:
@@ -54,6 +55,11 @@ class Mapping[T, R]:
     def map(self, data: Sequence[T]) -> R:
         return self.mapper(data)
     
+    @staticmethod
+    def wrapper(pickled_function: bytes, data: Sequence[T]) -> R:
+        function = dill.loads(pickled_function)
+        return function(data)
+    
     def __call__(self) -> list[R]:
         assert self.segment is not None, "Segment is not set"
         segments = self.segment()
@@ -61,7 +67,7 @@ class Mapping[T, R]:
         futures = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=len(segments)) as executor:
             for segment in segments:
-                futures.append(executor.submit(self.map, segment))
+                futures.append(executor.submit(self.wrapper, dill.dumps(self.map), segment))
         assert len(futures) == len(segments), "Length of futures and segments are not equal"
         result = []
         for future in concurrent.futures.as_completed(futures):

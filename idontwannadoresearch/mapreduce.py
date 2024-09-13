@@ -69,7 +69,7 @@ class Mapping[T, R]:
 
         return result
 
-    def __rshift__[R1](self, accumulate: Accumulate[R, R1]) -> R:
+    def __rshift__[R1](self, accumulate: 'Accumulate[R, R1]') -> R:
         accumulate.mapping = self
         return accumulate()
 

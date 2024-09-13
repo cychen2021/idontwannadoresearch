@@ -71,7 +71,7 @@ class Mapping[T, R]:
         assert len(futures) == len(segments), "Length of futures and segments are not equal"
         result = []
         for future in concurrent.futures.as_completed(futures):
-            result.extend(future.result())
+            result.append(future.result())
 
         return result
 

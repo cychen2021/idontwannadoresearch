@@ -71,7 +71,6 @@ class Mapping[T, R]:
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.callback = None
     
     def __call__(self,) -> list[R]:
         assert self.segment is not None, "Segment is not set"

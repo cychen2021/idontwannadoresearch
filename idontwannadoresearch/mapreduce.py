@@ -63,6 +63,15 @@ class Mapping[T, R]:
     def wrapper(pickled_function: bytes, data: Sequence[T]) -> R:
         function = dill.loads(pickled_function)
         return function(data)
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['callback']
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.callback = None
     
     def __call__(self,) -> list[R]:
         assert self.segment is not None, "Segment is not set"

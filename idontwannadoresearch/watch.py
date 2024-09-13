@@ -11,6 +11,7 @@ def watch(logger: Mailogger,
             except Exception as e:
                 logger.log('You are doomed!' if error_message is None else error_message, 
                            f'Exception: \n{e} \n------\nDiagnostic: \n{diagnose()}')
+                raise e
             else:
                 if report_ok:
                     logger.log('Successfully completed' if ok_message is None else ok_message)

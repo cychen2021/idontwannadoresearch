@@ -70,17 +70,16 @@ class Mapping[T, R]:
         segments = self.segment()
         
         futures = []
-        arguments = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=len(segments) if self.par_num is None else self.par_num) as executor:
             for segment in segments:
-                futures.append(executor.submit(self.wrapper, dill.dumps(self.mapper), segment))
-                arguments.append(segment)
+                future = executor.submit(self.wrapper, dill.dumps(self.mapper), segment)
+                if self.callback is not None:
+                    future.add_done_callback(lambda future: self.callback(segment, future))
+                futures.append(future)
             assert len(futures) == len(segments), "Length of futures and segments are not equal"
             result: list[R] = []
             for future in concurrent.futures.as_completed(futures):
                 r = future.result()
-                if self.callback is not None:
-                    self.callback(segment, future)
                 result.append(r)
 
         return result

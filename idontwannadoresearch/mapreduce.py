@@ -38,7 +38,7 @@ class Segment[T]:
         assert self.project is not None, "Project is not set"
         return self.seg(self.project.project())
     
-    def __rshift__[R](self, mapping: Mapping[T, R]) -> Mapping[T, R]:
+    def __rshift__[R](self, mapping: 'Mapping[T, R]') -> 'Mapping[T, R]':
         mapping.segment = self
         return mapping
     

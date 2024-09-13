@@ -36,5 +36,6 @@ class Mailogger:
             print(f"Failed to send email: {e}")
 
 class GMailLogger(Mailogger):
-    def __init__(self, identifier: str, sender_email: str) -> None:
-        super().__init__(identifier, 'smtp.gmail.com', sender_email, 587)
+    def __init__(self, identifier: str, sender_email: str, receiver_email) -> None:
+        super().__init__(identifier=identifier, smtp_server='smtp.gmail.com', sender_email=sender_email, 
+                         smtp_port=587, receiver_email=receiver_email)

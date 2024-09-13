@@ -60,8 +60,8 @@ class Mapping[T, R]:
         
         futures = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=len(segments)) as executor:
-            future = executor.map(self.map, segments)
-            futures.append(future)
+            for segment in segments:
+                futures.append(executor.submit(self.map, segment))
         assert len(futures) == len(segments), "Length of futures and segments are not equal"
         result = []
         for future in concurrent.futures.as_completed(futures):

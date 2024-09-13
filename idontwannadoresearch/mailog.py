@@ -21,7 +21,7 @@ class Mailogger:
         msg = EmailMessage()
         msg['From'] = self.sender_email
         msg['To'] = self.receiver_email
-        msg['Subject'] = f'[mailog:{self.identifier}] subject'
+        msg['Subject'] = f'[mailog:{self.identifier}] {subject}'
         timestamp = datetime.now().strftime(r'%Y-%m-%d %H:%M:%S')
         msg.set_content(body + f'\n---timestamp: {timestamp}---\n')
 

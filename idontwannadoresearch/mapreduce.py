@@ -48,9 +48,10 @@ def segment(seg_num: int) -> Segment:
 
 
 class Mapping[T, R]:
-    def __init__(self, mapper: Callable[[Sequence[T]], R], segment: Segment[T] | None) -> None:
+    def __init__(self, mapper: Callable[[Sequence[T]], R], para_num: int | None = None, segment: Segment[T] | None = None) -> None:
         self.mapper = mapper
         self.segment = segment
+        self.par_num = para_num
 
     def map(self, data: Sequence[T]) -> R:
         return self.mapper(data)
@@ -65,7 +66,7 @@ class Mapping[T, R]:
         segments = self.segment()
         
         futures = []
-        with concurrent.futures.ProcessPoolExecutor(max_workers=len(segments)) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=len(segments) if self.par_num is None else self.par_num) as executor:
             for segment in segments:
                 futures.append(executor.submit(self.wrapper, dill.dumps(self.map), segment))
         assert len(futures) == len(segments), "Length of futures and segments are not equal"
@@ -79,8 +80,8 @@ class Mapping[T, R]:
         accumulate.mapping = self
         return accumulate()
 
-def mapping[T, R](mapper: Callable[[Sequence[T]], R]) -> Mapping[T, R]:
-    return Mapping(mapper, None)
+def mapping[T, R](mapper: Callable[[Sequence[T]], R], para_num: int = 1) -> Mapping[T, R]:
+    return Mapping(mapper, para_num=para_num)
 
 
 class Accumulate[T, R]:

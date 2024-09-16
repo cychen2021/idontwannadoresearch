@@ -1,6 +1,7 @@
 from typing import Any, Sequence, Callable
 import concurrent.futures
 import dill
+import copy
 
 class Project[T]:
     def __init__(self, data: Sequence[T]) -> None:
@@ -30,9 +31,9 @@ class Segment[T]:
         
         result = []
         for i in range(0, self.seg_num):
-            result.append(data[i * base_seg_size:(i + 1) * base_seg_size])
+            result.append(copy.deepcopy(data[i * base_seg_size:(i + 1) * base_seg_size]))
         if residue > 0:
-            result[-1].extend(data[-residue:])
+            result[-1].extend(copy.deepcopy(data[-residue:]))
         return result
         
     def __call__(self) -> list[list[T]]:

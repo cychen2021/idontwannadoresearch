@@ -2,6 +2,7 @@ from typing import Any, Sequence, Callable
 import concurrent.futures
 import dill
 import copy
+import functools
 
 class Project[T]:
     def __init__(self, data: Sequence[T]) -> None:
@@ -31,9 +32,9 @@ class Segment[T]:
         
         result = []
         for i in range(0, self.seg_num):
-            result.append(copy.deepcopy(data[i * base_seg_size:(i + 1) * base_seg_size]))
+            result.append(data[i * base_seg_size:(i + 1) * base_seg_size])
         if residue > 0:
-            result[-1].extend(copy.deepcopy(data[-residue:]))
+            result[-1].extend(data[-residue:])
         return result
         
     def __call__(self) -> list[list[T]]:
@@ -71,11 +72,13 @@ class Mapping[T, R]:
         segments = self.segment()
         
         futures = []
+        def get_callback(segment):
+            return lambda future: self.callback(segment, future)
         with concurrent.futures.ProcessPoolExecutor(max_workers=len(segments) if self.par_num is None else self.par_num) as executor:
             for segment in segments:
                 future = executor.submit(self.wrapper, dill.dumps(self.mapper), segment)
                 if self.callback is not None:
-                    future.add_done_callback(lambda future: self.callback(segment, future))
+                    future.add_done_callback(get_callback(segment))
                 futures.append(future)
             assert len(futures) == len(segments), "Length of futures and segments are not equal"
             result: list[R] = []

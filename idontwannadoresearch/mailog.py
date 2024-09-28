@@ -9,7 +9,9 @@ class Mailogger:
     def __init__(self, identifier: str, 
                  smtp_server: str, sender_email: str, smtp_port: int,
                  receiver_email: str, chained_logger: logging.Logger | None = None) -> None:
-        if 'MAILOG_PASSWORD' not in os.environ:
+        if 'MAILOG_DISABLE' in os.environ and os.environ['MAILOG_DISABLE'] == '1':
+            self.disabled = True
+        if not self.disabled and 'MAILOG_PASSWORD' not in os.environ:
             print("Please set the MAILOG_PASSWORD environment variable")
             sys.exit(1)
         self.sender_email = sender_email
@@ -35,6 +37,8 @@ class Mailogger:
             self.chained_logger.info(header)
             self.chained_logger.info(body)
 
+        if self.disabled :
+            return
         # Connect to the server and send the email
         try:
             with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:

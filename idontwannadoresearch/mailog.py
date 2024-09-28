@@ -11,11 +11,14 @@ class Mailogger:
                  receiver_email: str, chained_logger: logging.Logger | None = None) -> None:
         if 'MAILOG_DISABLE' in os.environ and os.environ['MAILOG_DISABLE'] == '1':
             self.disabled = True
+        else:
+            self.disabled = False
         if not self.disabled and 'MAILOG_PASSWORD' not in os.environ:
             print("Please set the MAILOG_PASSWORD environment variable")
             sys.exit(1)
         self.sender_email = sender_email
-        self.sender_password = os.environ['MAILOG_PASSWORD']
+        if not self.disabled:
+            self.sender_password = os.environ['MAILOG_PASSWORD']
         self.smtp_server = smtp_server
         self.smtp_port = smtp_port
         self.identifier = identifier

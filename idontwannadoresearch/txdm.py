@@ -1,8 +1,10 @@
 from datetime import datetime
-from typing import TextIO
+from typing import TextIO, Generic, TypeVar
 import sys
 
-class txdm[T]:
+T = TypeVar('T')
+
+class txdm(Generic[T]):
     def __init__(self, total: int, file: TextIO = sys.stderr, desc=None, unit=None) -> None:
         self.start_time = None
         self.total = total

@@ -1,10 +1,14 @@
-from typing import Any, Sequence, Callable
+from typing import Any, Sequence, Callable, Generic, TypeVar
 import concurrent.futures
 import dill
 import copy
 import functools
 
-class Project[T]:
+T = TypeVar('T')
+R = TypeVar('R')
+R1 = TypeVar('R1')
+
+class Project(Generic[T]):
     def __init__(self, data: Sequence[T]) -> None:
         self.data = data
     
@@ -18,10 +22,10 @@ class Project[T]:
         segment.project = self
         return segment
 
-def project[T](data: Sequence[T]) -> Project[T]:
+def project(data: Sequence[T]) -> Project[T]:
     return Project(data)
 
-class Segment[T]:
+class Segment(Generic[T]):
     def __init__(self, seg_num: int, project: Project[T] | None = None) -> None:
         self.seg_num = seg_num
         self.project = project
@@ -41,7 +45,7 @@ class Segment[T]:
         assert self.project is not None, "Project is not set"
         return self.seg(self.project.project())
     
-    def __rshift__[R](self, mapping: 'Mapping[T, R]') -> 'Mapping[T, R]':
+    def __rshift__(self, mapping: 'Mapping[T, R]') -> 'Mapping[T, R]':
         mapping.segment = self
         return mapping
     
@@ -50,7 +54,7 @@ def segment(seg_num: int) -> Segment:
 
 import sys
 
-class Mapping[T, R]:
+class Mapping(Generic[T, R]):
     def __init__(self, mapper: Callable[[Sequence[T]], R], para_num: int | None = None,
                  callback: Callable[[Sequence[T], concurrent.futures.Future[R]], Any] | None = None, 
                  segment: Segment[T] | None = None) -> None:
@@ -73,7 +77,10 @@ class Mapping[T, R]:
         
         futures = []
         def get_callback(segment):
-            return lambda future: self.callback(segment, future)
+            def __callback(future: concurrent.futures.Future[R]) -> Any:
+                assert self.callback is not None, "Callback is not set"
+                return self.callback(segment, future)
+            return __callback
         with concurrent.futures.ProcessPoolExecutor(max_workers=len(segments) if self.par_num is None else self.par_num) as executor:
             for segment in segments:
                 future = executor.submit(self.wrapper, dill.dumps(self.mapper), segment)
@@ -88,16 +95,16 @@ class Mapping[T, R]:
 
         return result
 
-    def __rshift__[R1](self, accumulate: 'Accumulate[R, R1]') -> R:
+    def __rshift__(self, accumulate: 'Accumulate[R, R1]') -> R:
         accumulate.mapping = self
         return accumulate()
 
-def mapping[T, R](mapper: Callable[[Sequence[T]], R], para_num: int = 1, 
+def mapping(mapper: Callable[[Sequence[T]], R], para_num: int = 1, 
                   callback: Callable[[Sequence[T], concurrent.futures.Future[R]], Any] | None = None) -> Mapping[T, R]:
     return Mapping(mapper, para_num=para_num, callback=callback)
 
 
-class Accumulate[T, R]:
+class Accumulate(Generic[T, R]):
     def __init__(self, acc: Callable[[list[T]], R], mapping: Mapping[Any, T] | None = None) -> None:
         self.acc = acc
         self.mapping = mapping
@@ -109,7 +116,7 @@ class Accumulate[T, R]:
         assert self.mapping is not None, "Mapping is not set"
         return self.acc(self.mapping())
 
-def accumulate[T, R](acc: Callable[[list[T]], R]) -> Accumulate[T, R]:
+def accumulate(acc: Callable[[list[T]], R]) -> Accumulate[T, R]:
     return Accumulate(acc, None)
 
 

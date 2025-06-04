@@ -37,7 +37,7 @@ class MailLogger:
             self.disabled = True
         else:
             self.disabled = False
-        if not self.disabled and password = None and 'MAILOG_PASSWORD' not in os.environ:
+        if not self.disabled and password == None and 'MAILOG_PASSWORD' not in os.environ:
             print("Please set the MAILOG_PASSWORD environment variable")
             sys.exit(1)
         self.sender_email = sender_email

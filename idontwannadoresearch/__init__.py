@@ -1,3 +1,3 @@
-from .mailog import Mailogger, GMailLogger
+from .mailog import MailLogger, GMailLogger
 from .diagnostic import Diagnostic, diagnose
 from .watch import watch

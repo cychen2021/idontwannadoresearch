@@ -6,9 +6,9 @@ import sys
 import logging
 import tomllib
 
-class Mailogger:
+class MailLogger:
     @staticmethod
-    def load_from_config(file: str, chained_logger: logging.Logger | None = None) -> 'Mailogger':
+    def load_from_config(id: str, file: str, chained_logger: logging.Logger | None = None) -> 'MailLogger':
         with open(file, 'rb') as f:
             config = tomllib.load(f)
         logging_config = config.get('logging', {})
@@ -18,8 +18,8 @@ class Mailogger:
         email_smtp_server = logging_config.get('email_smtp_server', 'smtp.gmail.com')
         email_smtp_port = logging_config.get('email_smtp_port', 587)
         email_smtp_password = logging_config.get('email_smtp_password', None)
-        return Mailogger(
-            identifier=config.get('identifier', 'default'),
+        return MailLogger(
+            identifier=id,
             smtp_server=email_smtp_server,
             sender_email=email_send,
             smtp_port=email_smtp_port,
@@ -76,7 +76,7 @@ class Mailogger:
         except Exception as e:
             print(f"Failed to send email: {e}")
 
-class GMailLogger(Mailogger):
+class GMailLogger(MailLogger):
     def __init__(self, identifier: str, sender_email: str, receiver_email, chained_logger: logging.Logger | None = None) -> None:
         super().__init__(identifier=identifier, smtp_server='smtp.gmail.com', sender_email=sender_email, 
                          smtp_port=587, receiver_email=receiver_email, chained_logger=chained_logger)

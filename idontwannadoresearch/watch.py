@@ -1,7 +1,7 @@
-from .mailog import Mailogger
+from .mailog import MailLogger
 from .diagnostic import Diagnostic, diagnose
 
-def watch(logger: Mailogger, 
+def watch(logger: MailLogger, 
           error_message: str | None = None,
           *, report_ok: bool = False, ok_message: str | None = None):
     def __watch(func):

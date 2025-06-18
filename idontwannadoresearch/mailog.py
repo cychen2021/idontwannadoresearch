@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 import sys
 import logging
-if sys.version_info <= (3, 10):
+if sys.version_info < (3, 11):
     import tomli as tomllib
 else:
     import tomllib

@@ -4,7 +4,10 @@ from datetime import datetime
 import os
 import sys
 import logging
-import tomllib
+if sys.version_info <= (3, 10):
+    import tomli as tomllib
+else:
+    import tomllib
 
 class MailLogger:
     @staticmethod

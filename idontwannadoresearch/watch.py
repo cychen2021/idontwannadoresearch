@@ -10,7 +10,7 @@ def watch(logger: MailLogger,
                 result = func(*args, **kwargs)
             except Exception as e:
                 logger.log('You are doomed!' if error_message is None else error_message, 
-                           f'Exception: \n{e} \n------\nDiagnostic: \n{diagnose()}')
+                           f'Exception: \n{e!r} \n------\nDiagnostic: \n{diagnose()}')
                 raise e
             else:
                 if report_ok:
